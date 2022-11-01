@@ -342,9 +342,9 @@ Resources:
         - !Ref PrivateRouteTable2
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub ${ProjectName}-vpce-s3
+      # Tags:
+      #   - Key: Name
+      #     Value: !Sub ${ProjectName}-vpce-s3
 Outputs:
   VPCId:
     Description: VPCId of VPC
