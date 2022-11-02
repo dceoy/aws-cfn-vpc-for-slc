@@ -1,7 +1,7 @@
 aws-cfn-vpc-for-slc
 ===================
 
-AWS Stacks of VPC for serverless computing
+AWS CloudFormation stacks of VPC for serverless computing
 
 [![Lint](https://github.com/dceoy/aws-cfn-vpc-for-slc/actions/workflows/lint.yml/badge.svg)](https://github.com/dceoy/aws-cfn-vpc-for-slc/actions/workflows/lint.yml)
 
