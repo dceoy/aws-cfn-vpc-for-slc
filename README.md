@@ -17,8 +17,14 @@ Installation
 
 2.  Install [Rain](https://github.com/aws-cloudformation/rain) and set `~/.aws/config` and `~/.aws/credentials`.
 
-3.  Deploy a VPC stack.
+3.  Deploy VPC stacks for private subnets and a VPC endpoint.
 
     ```sh
-    $ rain deploy vpc-for-serverless-hpc.cfn.yml vpc-for-serverless-hpc
+    $ rain deploy vpc-private-subnets-and-s3-endpoint.cfn.yml vpc-private-subnets-and-s3-endpoint
+    ```
+
+4.  Deploy VPC stacks for public subnets and a NAT gateway for internet access. (optional)
+
+    ```sh
+    $ rain deploy vpc-public-subnets-and-nat-gateway.cfn.yml vpc-public-subnets-and-nat-gateway
     ```
