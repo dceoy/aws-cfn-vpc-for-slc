@@ -5,20 +5,20 @@ Parameters:
   VpcStackName:
     Description: Set the VPC stack name.
     Type: String
-    Default: vpc-private-subnets-and-endpoint-for-s3
+    Default: vpc-private-subnets-with-s3-endpoint
   ProjectName:
     Description: Set the project name.
     Type: String
     Default: slhpc
-  AZ0:
+  Az0:
     Description: Set the first AZ suffix.
     Type: String
     Default: a
-  AZ1:
+  Az1:
     Description: Set the second AZ suffix.
     Type: String
     Default: c
-  AZ2:
+  Az2:
     Description: Set the third AZ suffix.
     Type: String
     Default: d
@@ -36,7 +36,7 @@ Resources:
     Properties:
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
-      AvailabilityZone: !Sub ${AWS::Region}${AZ0}
+      AvailabilityZone: !Sub ${AWS::Region}${Az0}
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
@@ -49,13 +49,13 @@ Resources:
         - Key: Network
           Value: Public
         - Key: Name
-          Value: !Sub ${ProjectName}-subnet-public0-${AWS::Region}${AZ0}
+          Value: !Sub ${ProjectName}-subnet-public0-${AWS::Region}${Az0}
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
-      AvailabilityZone: !Sub ${AWS::Region}${AZ1}
+      AvailabilityZone: !Sub ${AWS::Region}${Az1}
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
@@ -68,13 +68,13 @@ Resources:
         - Key: Network
           Value: Public
         - Key: Name
-          Value: !Sub ${ProjectName}-subnet-public1-${AWS::Region}${AZ1}
+          Value: !Sub ${ProjectName}-subnet-public1-${AWS::Region}${Az1}
   PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
-      AvailabilityZone: !Sub ${AWS::Region}${AZ2}
+      AvailabilityZone: !Sub ${AWS::Region}${Az2}
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
@@ -87,7 +87,7 @@ Resources:
         - Key: Network
           Value: Public
         - Key: Name
-          Value: !Sub ${ProjectName}-subnet-public2-${AWS::Region}${AZ2}
+          Value: !Sub ${ProjectName}-subnet-public2-${AWS::Region}${Az2}
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -193,7 +193,15 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  NATGateway0:
+  ElasticIP1:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  ElasticIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NatGateway0:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId:
@@ -203,45 +211,67 @@ Resources:
       SubnetId: !Ref PublicSubnet0
       Tags:
         - Key: Name
-          Value: !Sub ${ProjectName}-nat-public0-${AWS::Region}${AZ0}
+          Value: !Sub ${ProjectName}-nat-public0-${AWS::Region}${Az0}
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - ElasticIP1
+          - AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-nat-public1-${AWS::Region}${Az1}
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - ElasticIP2
+          - AllocationId
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-nat-public2-${AWS::Region}${Az2}
   PrivateRouteToInternet0:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateRouteTable0
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NATGateway0
+      NatGatewayId: !Ref NatGateway0
   PrivateRouteToInternet1:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateRouteTable1
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NATGateway0
+      NatGatewayId: !Ref NatGateway1
   PrivateRouteToInternet2:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateRouteTable2
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NATGateway0
+      NatGatewayId: !Ref NatGateway2
 Outputs:
-  PublicSubnet0:
+  PublicSubnetId0:
     Description: SubnetId of public subnet 0
     Value: !Ref PublicSubnet0
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet0
-  PublicSubnet1:
+  PublicSubnetId1:
     Description: SubnetId of public subnet 1
     Value: !Ref PublicSubnet1
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet1
-  PublicSubnet2:
+  PublicSubnetId2:
     Description: SubnetId of public subnet 2
     Value: !Ref PublicSubnet2
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet2
-  PublicRouteTable:
+  PublicRouteTableId:
     Description: RouteTableId of the public route table
     Value: !Ref PublicRouteTable
     Export:

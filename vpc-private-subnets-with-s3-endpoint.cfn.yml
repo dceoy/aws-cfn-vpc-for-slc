@@ -6,15 +6,15 @@ Parameters:
     Description: Set the project name.
     Type: String
     Default: slhpc
-  AZ0:
+  Az0:
     Description: Set the first AZ suffix.
     Type: String
     Default: a
-  AZ1:
+  Az1:
     Description: Set the second AZ suffix.
     Type: String
     Default: c
-  AZ2:
+  Az2:
     Description: Set the third AZ suffix.
     Type: String
     Default: d
@@ -50,7 +50,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Sub ${AWS::Region}${AZ0}
+      AvailabilityZone: !Sub ${AWS::Region}${Az0}
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
@@ -62,12 +62,12 @@ Resources:
         - Key: Network
           Value: Private
         - Key: Name
-          Value: !Sub ${ProjectName}-subnet-private0-${AWS::Region}${AZ0}
+          Value: !Sub ${ProjectName}-subnet-private0-${AWS::Region}${Az0}
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Sub ${AWS::Region}${AZ1}
+      AvailabilityZone: !Sub ${AWS::Region}${Az1}
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
@@ -79,12 +79,12 @@ Resources:
         - Key: Network
           Value: Private
         - Key: Name
-          Value: !Sub ${ProjectName}-subnet-private1-${AWS::Region}${AZ1}
+          Value: !Sub ${ProjectName}-subnet-private1-${AWS::Region}${Az1}
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Sub ${AWS::Region}${AZ2}
+      AvailabilityZone: !Sub ${AWS::Region}${Az2}
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
@@ -96,28 +96,28 @@ Resources:
         - Key: Network
           Value: Private
         - Key: Name
-          Value: !Sub ${ProjectName}-subnet-private2-${AWS::Region}${AZ2}
+          Value: !Sub ${ProjectName}-subnet-private2-${AWS::Region}${Az2}
   PrivateRouteTable0:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${ProjectName}-rtb-private0-${AWS::Region}${AZ0}
+          Value: !Sub ${ProjectName}-rtb-private0-${AWS::Region}${Az0}
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${ProjectName}-rtb-private1-${AWS::Region}${AZ1}
+          Value: !Sub ${ProjectName}-rtb-private1-${AWS::Region}${Az1}
   PrivateRouteTable2:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${ProjectName}-rtb-private2-${AWS::Region}${AZ2}
+          Value: !Sub ${ProjectName}-rtb-private2-${AWS::Region}${Az2}
   PrivateSubnetRouteTableAssociation0:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -160,37 +160,37 @@ Outputs:
     Value: !Ref VPC
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-VPC
-  PrivateSubnet0:
+  PrivateSubnetId0:
     Description: SubnetId of the private subnet 0
     Value: !Ref PrivateSubnet0
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet0
-  PrivateSubnet1:
+  PrivateSubnetId1:
     Description: SubnetId of the private subnet 1
     Value: !Ref PrivateSubnet1
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet1
-  PrivateSubnet2:
+  PrivateSubnetId2:
     Description: SubnetId of the private subnet 2
     Value: !Ref PrivateSubnet2
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet2
-  DefaultSecurityGroup:
+  DefaultSecurityGroupId:
     Description: DefaultSecurityGroup Id
     Value: !GetAtt VPC.DefaultSecurityGroup
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-DefaultSecurityGroup
-  PrivateRouteTable0:
+  PrivateRouteTableId0:
     Description: RouteTableId of the private route table 0
     Value: !Ref PrivateRouteTable0
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateRouteTable0
-  PrivateRouteTable1:
+  PrivateRouteTableId1:
     Description: RouteTableId of the private route table 1
     Value: !Ref PrivateRouteTable1
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateRouteTable1
-  PrivateRouteTable2:
+  PrivateRouteTableId2:
     Description: RouteTableId of the private route table 2
     Value: !Ref PrivateRouteTable2
     Export:
