@@ -190,12 +190,6 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       NetworkAclId: !Ref PublicNetworkAcl
 Outputs:
-  VpcId:
-    Description: VpcId of the VPC
-    Value:
-      Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
-    Export:
-      Name: !Sub ${AWS::Region}-${AWS::StackName}-VPC
   PublicSubnetId0:
     Description: SubnetId of public subnet 0
     Value: !Ref PublicSubnet0
