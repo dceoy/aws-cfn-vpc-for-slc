@@ -25,11 +25,11 @@ Parameters:
 Mappings:
   SubnetConfig:
     Public0:
-      CIDR: 10.0.128.0/24
+      CIDR: 10.0.48.0/24
     Public1:
-      CIDR: 10.0.144.0/24
+      CIDR: 10.0.64.0/24
     Public2:
-      CIDR: 10.0.160.0/24
+      CIDR: 10.0.80.0/24
 Resources:
   PublicSubnet0:
     Type: AWS::EC2::Subnet
@@ -190,6 +190,12 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       NetworkAclId: !Ref PublicNetworkAcl
 Outputs:
+  VpcId:
+    Description: VpcId of the VPC
+    Value:
+      Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-VPC
   PublicSubnetId0:
     Description: SubnetId of public subnet 0
     Value: !Ref PublicSubnet0
