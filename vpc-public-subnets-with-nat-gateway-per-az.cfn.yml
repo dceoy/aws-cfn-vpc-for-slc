@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: VPC public subnets in 3 AZs and a NAT gateway in 1 AZ
+Description: VPC public subnets in 3 AZs and NAT gateways
 Parameters:
   VpcStackName:
     Description: Set the VPC stack name.
