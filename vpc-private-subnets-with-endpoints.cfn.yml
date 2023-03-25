@@ -1,0 +1,375 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: VPC with private subnets in 3 AZs and VPC endpoints
+Parameters:
+  ProjectName:
+    Description: Set the project name.
+    Type: String
+    Default: slhpc
+  Az0:
+    Description: Set the first AZ suffix.
+    Type: String
+    Default: a
+  Az1:
+    Description: Set the second AZ suffix.
+    Type: String
+    Default: c
+  Az2:
+    Description: Set the third AZ suffix.
+    Type: String
+    Default: d
+Mappings:
+  SubnetConfig:
+    VPC:
+      CIDR: 10.0.0.0/16
+    Private0:
+      CIDR: 10.0.0.0/24
+    Private1:
+      CIDR: 10.0.16.0/24
+    Private2:
+      CIDR: 10.0.32.0/24
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock:
+        Fn::FindInMap:
+          - SubnetConfig
+          - VPC
+          - CIDR
+      Tags:
+        - Key: Application
+          Value: !Ref AWS::StackName
+        - Key: Network
+          Value: Public
+        - Key: Name
+          Value: !Sub ${ProjectName}-vpc
+  PrivateSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Sub ${AWS::Region}${Az0}
+      CidrBlock:
+        Fn::FindInMap:
+          - SubnetConfig
+          - Private0
+          - CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Application
+          Value: !Ref AWS::StackName
+        - Key: Network
+          Value: Private
+        - Key: Name
+          Value: !Sub ${ProjectName}-subnet-private0-${AWS::Region}${Az0}
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Sub ${AWS::Region}${Az1}
+      CidrBlock:
+        Fn::FindInMap:
+          - SubnetConfig
+          - Private1
+          - CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Application
+          Value: !Ref AWS::StackName
+        - Key: Network
+          Value: Private
+        - Key: Name
+          Value: !Sub ${ProjectName}-subnet-private1-${AWS::Region}${Az1}
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Sub ${AWS::Region}${Az2}
+      CidrBlock:
+        Fn::FindInMap:
+          - SubnetConfig
+          - Private2
+          - CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Application
+          Value: !Ref AWS::StackName
+        - Key: Network
+          Value: Private
+        - Key: Name
+          Value: !Sub ${ProjectName}-subnet-private2-${AWS::Region}${Az2}
+  PrivateRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-rtb-private0-${AWS::Region}${Az0}
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-rtb-private1-${AWS::Region}${Az1}
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-rtb-private2-${AWS::Region}${Az2}
+  PrivateSubnetRouteTableAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet0
+      RouteTableId: !Ref PrivateRouteTable0
+  PrivateSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+  PrivateSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable2
+  S3GatewayEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      RouteTableIds:
+        - !Ref PrivateRouteTable0
+        - !Ref PrivateRouteTable1
+        - !Ref PrivateRouteTable2
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref VPC
+  EcrDkrInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  EcrApiInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  EcsInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  EcsAgentInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-agent
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  EcsTelemetryInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-telemetry
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  LogsInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  SecretsmanagerInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.secretsmanager
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  SsmInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ssm
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+  SsmmessagesInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ssmmessages
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
+Outputs:
+  VpcId:
+    Description: VpcId of the VPC
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-VPC
+  PrivateSubnetId0:
+    Description: SubnetId of the private subnet 0
+    Value: !Ref PrivateSubnet0
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet0
+  PrivateSubnetId1:
+    Description: SubnetId of the private subnet 1
+    Value: !Ref PrivateSubnet1
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet1
+  PrivateSubnetId2:
+    Description: SubnetId of the private subnet 2
+    Value: !Ref PrivateSubnet2
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet2
+  DefaultSecurityGroupId:
+    Description: DefaultSecurityGroup Id
+    Value: !GetAtt VPC.DefaultSecurityGroup
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-DefaultSecurityGroup
+  PrivateRouteTableId0:
+    Description: RouteTableId of the private route table 0
+    Value: !Ref PrivateRouteTable0
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateRouteTable0
+  PrivateRouteTableId1:
+    Description: RouteTableId of the private route table 1
+    Value: !Ref PrivateRouteTable1
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateRouteTable1
+  PrivateRouteTableId2:
+    Description: RouteTableId of the private route table 2
+    Value: !Ref PrivateRouteTable2
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateRouteTable2
