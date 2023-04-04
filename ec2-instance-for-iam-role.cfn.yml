@@ -1,0 +1,84 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: EC2 instance
+Parameters:
+  ImageId:
+    Description: Set an EC2 AMI ID.
+    Type: AWS::EC2::Image::Id
+    ConstraintDescription: must be a valid EC2 instance type.
+  InstanceType:
+    Description: Set an EC2 instance type.
+    Type: String
+    Default: t2.micro
+    ConstraintDescription: must be a valid EC2 instance type.
+  InstanceName:
+    Description: Set an EC2 instance name.
+    Type: String
+    Default: ec2-headnode
+  EbsVolumeSize:
+    Description: Set EBS volume size.
+    Type: Number
+    MinValue: 0
+    Default: 30
+  VpcStackName:
+    Description: Set the VPC stack name.
+    Type: String
+    Default: vpc-private-subnets-with-endpoints
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          SubnetId:
+            Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+          GroupSet:
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: !Ref EbsVolumeSize
+            VolumeType: gp3
+            Encrypted: true
+            DeleteOnTermination: true
+      InstanceInitiatedShutdownBehavior: terminate
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      Tags:
+        - Key: Name
+          Value: !Ref InstanceName
+  Ec2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${InstanceName}-Ec2InstanceRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+                - ssm.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+  Ec2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref Ec2InstanceRole
+Outputs:
+  Ec2InstanceId:
+    Description: EC2 instance Id
+    Value: !Ref Ec2Instance
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2InstanceId
+  Ec2InstanceRole:
+    Description: EC2 instance role
+    Value: !Ref Ec2InstanceRole
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2InstanceRole
