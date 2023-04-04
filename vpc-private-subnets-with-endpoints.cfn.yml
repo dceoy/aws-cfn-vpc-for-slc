@@ -333,6 +333,26 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ssmmessages
       VpcEndpointType: Interface
       VpcId: !Ref VPC
+  Ec2messagesInterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Resource: '*'
+            Effect: Allow
+            Principal: '*'
+            Action: '*'
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet0
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt VPC.DefaultSecurityGroup
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2messages
+      VpcEndpointType: Interface
+      VpcId: !Ref VPC
 Outputs:
   VpcId:
     Description: VpcId of the VPC
