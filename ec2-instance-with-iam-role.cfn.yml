@@ -1,10 +1,11 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: EC2 instance
+Description: an EC2 instance and an IAM role
 Parameters:
   ImageId:
     Description: Set an EC2 AMI ID.
     Type: AWS::EC2::Image::Id
+    Default: ami-02a0270a232f442b0
     ConstraintDescription: must be a valid EC2 instance type.
   InstanceType:
     Description: Set an EC2 instance type.

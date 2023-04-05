@@ -5,7 +5,7 @@ Parameters:
   ProjectName:
     Description: Set the project name.
     Type: String
-    Default: slhpc
+    Default: slc
   Az0:
     Description: Set the first AZ suffix.
     Type: String

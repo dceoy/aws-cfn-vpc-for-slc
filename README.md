@@ -21,14 +21,31 @@ Installation
 
     ```sh
     $ rain deploy \
-        vpc-private-subnets-with-s3-endpoint.cfn.yml \
-        vpc-private-subnets-with-s3-endpoint
+        vpc-private-subnets-with-endpoints.cfn.yml \
+        vpc-private-subnets-with-endpoints
     ```
 
-4.  Deploy VPC stacks for public subnets with a NAT gateway for internet access. (optional)
+4.  Deploy VPC stacks for public subnets. (optional)
 
-    ```sh
-    $ rain deploy \
-        vpc-public-subnets-with-nat-gateway-in-1az.cfn.yml \
-        vpc-public-subnets-with-nat-gateway-in-1az
-    ```
+    - public subnets with NAT gateways
+
+      ```sh
+      $ rain deploy \
+          vpc-public-subnets-with-nat-gateway-per-az.cfn.yml \
+          vpc-public-subnets-with-nat-gateway-per-az
+      ```
+
+    - public subnets with a NAT gateway in 1 AZ
+
+      ```sh
+      $ rain deploy \
+          vpc-public-subnets-with-nat-gateway-in-1az.cfn.yml \
+          vpc-public-subnets-with-nat-gateway-in-1az
+      ```
+
+    - public subnets without NAT gateway
+
+      ```sh
+      $ rain deploy \
+          vpc-public-subnets.cfn.yml vpc-public-subnets
+      ```
