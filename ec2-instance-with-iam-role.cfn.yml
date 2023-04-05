@@ -2,6 +2,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: an EC2 instance and an IAM role
 Parameters:
+  KeyName:
+    Description: Set a name of an existing EC2 KeyPair to enable SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
   ImageId:
     Description: Set an EC2 AMI ID.
     Type: AWS::EC2::Image::Id
@@ -30,6 +34,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref ImageId
+      KeyName: !Ref KeyName
       InstanceType: !Ref InstanceType
       NetworkInterfaces:
         - DeviceIndex: 0

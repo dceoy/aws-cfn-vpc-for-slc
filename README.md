@@ -49,3 +49,18 @@ Installation
       $ rain deploy \
           vpc-public-subnets.cfn.yml vpc-public-subnets
       ```
+
+5.  Deploy EC2 stacks for an EC2 instance. (optional)
+
+    ```sh
+    # Create EC2 key pair
+    $ aws ec2 create-key-pair \
+        --key-name MyKeyPair --query 'KeyMaterial' --output text \
+        > MyKeyPair.pem
+    $ chmod 400 MyKeyPair.pem
+
+    # Deploy the stacks
+    $ rain deploy \
+        ec2-instance-with-iam-role.cfn.yml \
+        ec2-instance-with-iam-role
+    ```
