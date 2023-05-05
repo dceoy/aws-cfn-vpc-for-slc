@@ -5,7 +5,7 @@ Parameters:
   VpcStackName:
     Description: Set the VPC stack name.
     Type: String
-    Default: vpc-private-subnets-with-s3-endpoint
+    Default: vpc-private-subnets-with-gateway-endpoints
   ProjectName:
     Description: Set the project name.
     Type: String
