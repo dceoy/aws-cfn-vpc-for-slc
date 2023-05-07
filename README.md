@@ -29,7 +29,8 @@ Installation
 
     ```sh
     $ rain deploy \
-        vpc-interface-endpoints.cfn.yml vpc-interface-endpoints
+        vpc-interface-endpoints-for-ecr-and-ecs.cfn.yml \
+        vpc-interface-endpoints-for-ecr-and-ecs
     ```
 
 5.  Deploy VPC stacks for public subnets. (optional)
@@ -67,6 +68,9 @@ Installation
     $ chmod 400 MyKeyPair.pem
 
     # Deploy the stacks
+    $ rain deploy \
+        vpc-interface-endpoints-for-ec2-and-ssm.cfn.yml \
+        vpc-interface-endpoints-for-ec2-and-ssm
     $ rain deploy \
         ec2-instance-with-iam-role.cfn.yml \
         ec2-instance-with-iam-role
