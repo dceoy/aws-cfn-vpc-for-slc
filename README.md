@@ -69,8 +69,8 @@ Installation
 
     # Deploy the stacks
     $ rain deploy \
-        vpc-interface-endpoints-for-ec2-and-ssm.cfn.yml \
-        vpc-interface-endpoints-for-ec2-and-ssm
+        vpc-interface-endpoints-for-ssm-and-ec2.cfn.yml \
+        vpc-interface-endpoints-for-ssm-and-ec2
     $ rain deploy \
         ec2-instance-with-iam-role.cfn.yml \
         ec2-instance-with-iam-role

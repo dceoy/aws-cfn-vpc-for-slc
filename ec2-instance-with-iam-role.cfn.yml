@@ -28,7 +28,7 @@ Parameters:
   VpcStackName:
     Description: Set the VPC stack name.
     Type: String
-    Default: vpc-private-subnets-with-endpoints
+    Default: vpc-private-subnets-with-gateway-endpoints
 Resources:
   Ec2Instance:
     Type: AWS::EC2::Instance
