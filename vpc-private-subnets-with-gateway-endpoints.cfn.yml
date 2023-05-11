@@ -176,6 +176,16 @@ Outputs:
     Value: !Ref VPC
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-VPC
+  DefaultSecurityGroupId:
+    Description: SecurityGroupId of the default security group
+    Value: !GetAtt VPC.DefaultSecurityGroup
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-DefaultSecurityGroup
+  DefaultNetworkAclId:
+    Description: NetworkAclId of the default network ACL
+    Value: !GetAtt VPC.DefaultNetworkAcl
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-DefaultNetworkAcl
   PrivateSubnetId0:
     Description: SubnetId of the private subnet 0
     Value: !Ref PrivateSubnet0
@@ -191,11 +201,6 @@ Outputs:
     Value: !Ref PrivateSubnet2
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet2
-  DefaultSecurityGroupId:
-    Description: DefaultSecurityGroup Id
-    Value: !GetAtt VPC.DefaultSecurityGroup
-    Export:
-      Name: !Sub ${AWS::Region}-${AWS::StackName}-DefaultSecurityGroup
   PrivateRouteTableId0:
     Description: RouteTableId of the private route table 0
     Value: !Ref PrivateRouteTable0
