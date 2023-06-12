@@ -216,3 +216,13 @@ Outputs:
     Value: !Ref PrivateRouteTable2
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateRouteTable2
+  S3GatewayEndpointId:
+    Description: S3 gateway endpoint Id
+    Value: !Ref S3GatewayEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-S3GatewayEndpoint
+  DynamodbGatewayEndpointId:
+    Description: DynamoDB gateway endpoint Id
+    Value: !Ref DynamodbGatewayEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-DynamodbGatewayEndpoint

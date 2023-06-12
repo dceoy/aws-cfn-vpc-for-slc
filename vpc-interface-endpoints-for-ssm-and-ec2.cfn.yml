@@ -28,7 +28,7 @@ Resources:
       VpcEndpointType: Interface
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
-  Ec2messagesInterfaceEndpoint:
+  Ec2MessagesInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       PolicyDocument:
@@ -70,7 +70,7 @@ Resources:
       VpcEndpointType: Interface
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
-  SsmmessagesInterfaceEndpoint:
+  SsmMessagesInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       PolicyDocument:
@@ -91,7 +91,7 @@ Resources:
       VpcEndpointType: Interface
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
-  SecretsmanagerInterfaceEndpoint:
+  SecretsManagerInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
       PolicyDocument:
@@ -112,3 +112,29 @@ Resources:
       VpcEndpointType: Interface
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+Outputs:
+  Ec2InterfaceEndpointId:
+    Description: EC2 interface endpoint Id
+    Value: !Ref Ec2InterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2InterfaceEndpoint
+  Ec2MessagesInterfaceEndpointId:
+    Description: EC2 messages interface endpoint Id
+    Value: !Ref Ec2MessagesInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2MessagesInterfaceEndpoint
+  SsmInterfaceEndpointId:
+    Description: SSM interface endpoint Id
+    Value: !Ref SsmInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-SsmInterfaceEndpoint
+  SsmMessagesInterfaceEndpointId:
+    Description: SSM messages interface endpoint Id
+    Value: !Ref SsmMessagesInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-SsmMessagesInterfaceEndpoint
+  SecretsManagerInterfaceEndpointId:
+    Description: Secrets manager interface endpoint Id
+    Value: !Ref SecretsManagerInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-SecretsManagerInterfaceEndpoint

@@ -133,3 +133,34 @@ Resources:
       VpcEndpointType: Interface
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+Outputs:
+  EcrDkrInterfaceEndpointId:
+    Description: ECR DKR interface endpoint Id
+    Value: !Ref EcrDkrInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-EcrDkrInterfaceEndpoint
+  EcrApiInterfaceEndpointId:
+    Description: ECR API interface endpoint Id
+    Value: !Ref EcrApiInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-EcrApiInterfaceEndpoint
+  EcsInterfaceEndpointId:
+    Description: ECS interface endpoint Id
+    Value: !Ref EcsInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-EcsInterfaceEndpoint
+  EcsAgentInterfaceEndpointId:
+    Description: ECS agent interface endpoint Id
+    Value: !Ref EcsAgentInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-EcsAgentInterfaceEndpoint
+  EcsTelemetryInterfaceEndpointId:
+    Description: ECS telemetry interface endpoint Id
+    Value: !Ref EcsTelemetryInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-EcsTelemetryInterfaceEndpoint
+  LogsInterfaceEndpointId:
+    Description: Logs interface endpoint Id
+    Value: !Ref LogsInterfaceEndpoint
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-LogsInterfaceEndpoint
