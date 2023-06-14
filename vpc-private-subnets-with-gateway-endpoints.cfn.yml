@@ -20,7 +20,7 @@ Parameters:
     Default: d
 Mappings:
   SubnetConfig:
-    VPC:
+    Vpc:
       CIDR: 10.0.0.0/16
     Private0:
       CIDR: 10.0.0.0/24
@@ -29,7 +29,7 @@ Mappings:
     Private2:
       CIDR: 10.0.32.0/24
 Resources:
-  VPC:
+  Vpc:
     Type: AWS::EC2::VPC
     Properties:
       EnableDnsSupport: true
@@ -37,7 +37,7 @@ Resources:
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
-          - VPC
+          - Vpc
           - CIDR
       Tags:
         - Key: Application
@@ -49,7 +49,7 @@ Resources:
   PrivateSubnet0:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId: !Ref VPC
+      VpcId: !Ref Vpc
       AvailabilityZone: !Sub ${AWS::Region}${Az0}
       CidrBlock:
         Fn::FindInMap:
@@ -67,7 +67,7 @@ Resources:
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId: !Ref VPC
+      VpcId: !Ref Vpc
       AvailabilityZone: !Sub ${AWS::Region}${Az1}
       CidrBlock:
         Fn::FindInMap:
@@ -85,7 +85,7 @@ Resources:
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId: !Ref VPC
+      VpcId: !Ref Vpc
       AvailabilityZone: !Sub ${AWS::Region}${Az2}
       CidrBlock:
         Fn::FindInMap:
@@ -103,21 +103,21 @@ Resources:
   PrivateRouteTable0:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: !Ref VPC
+      VpcId: !Ref Vpc
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-rtb-private0-${AWS::Region}${Az0}
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: !Ref VPC
+      VpcId: !Ref Vpc
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-rtb-private1-${AWS::Region}${Az1}
   PrivateRouteTable2:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: !Ref VPC
+      VpcId: !Ref Vpc
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-rtb-private2-${AWS::Region}${Az2}
@@ -152,7 +152,7 @@ Resources:
         - !Ref PrivateRouteTable2
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcEndpointType: Gateway
-      VpcId: !Ref VPC
+      VpcId: !Ref Vpc
   DynamodbGatewayEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -169,21 +169,21 @@ Resources:
         - !Ref PrivateRouteTable2
       ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
       VpcEndpointType: Gateway
-      VpcId: !Ref VPC
+      VpcId: !Ref Vpc
 Outputs:
   VpcId:
     Description: VpcId of the VPC
-    Value: !Ref VPC
+    Value: !Ref Vpc
     Export:
-      Name: !Sub ${AWS::Region}-${AWS::StackName}-VPC
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Vpc
   DefaultSecurityGroupId:
     Description: SecurityGroupId of the default security group
-    Value: !GetAtt VPC.DefaultSecurityGroup
+    Value: !GetAtt Vpc.DefaultSecurityGroup
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-DefaultSecurityGroup
   DefaultNetworkAclId:
     Description: NetworkAclId of the default network ACL
-    Value: !GetAtt VPC.DefaultNetworkAcl
+    Value: !GetAtt Vpc.DefaultNetworkAcl
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-DefaultNetworkAcl
   PrivateSubnetId0:

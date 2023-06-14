@@ -27,7 +27,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
   EcrApiInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -48,7 +48,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
   EcsInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -69,7 +69,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
   EcsAgentInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -90,7 +90,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-agent
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
   EcsTelemetryInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -111,7 +111,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-telemetry
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
   LogsInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -132,7 +132,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.logs
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
 Outputs:
   EcrDkrInterfaceEndpointId:
     Description: ECR DKR interface endpoint Id

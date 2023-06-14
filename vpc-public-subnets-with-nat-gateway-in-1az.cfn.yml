@@ -35,7 +35,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
       AvailabilityZone: !Sub ${AWS::Region}${Az0}
       CidrBlock:
         Fn::FindInMap:
@@ -54,7 +54,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
       AvailabilityZone: !Sub ${AWS::Region}${Az1}
       CidrBlock:
         Fn::FindInMap:
@@ -73,7 +73,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
       AvailabilityZone: !Sub ${AWS::Region}${Az2}
       CidrBlock:
         Fn::FindInMap:
@@ -102,13 +102,13 @@ Resources:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
       InternetGatewayId: !Ref InternetGateway
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
       Tags:
         - Key: Application
           Value: !Ref AWS::StackName
@@ -142,7 +142,7 @@ Resources:
     Type: AWS::EC2::NetworkAcl
     Properties:
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
       Tags:
         - Key: Application
           Value: !Ref AWS::StackName
@@ -189,7 +189,7 @@ Resources:
     Properties:
       SubnetId: !Ref PublicSubnet2
       NetworkAclId: !Ref PublicNetworkAcl
-  ElasticIP0:
+  ElasticIp0:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
@@ -198,7 +198,7 @@ Resources:
     Properties:
       AllocationId:
         Fn::GetAtt:
-          - ElasticIP0
+          - ElasticIp0
           - AllocationId
       SubnetId: !Ref PublicSubnet0
       Tags:
@@ -241,8 +241,28 @@ Outputs:
     Value: !Ref PublicSubnet2
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet2
+  InternetGatewayId:
+    Description: InternetGatewayId
+    Value: !Ref InternetGateway
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-InternetGateway
   PublicRouteTableId:
     Description: RouteTableId of the public route table
     Value: !Ref PublicRouteTable
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicRouteTable
+  PublicNetworkAclId:
+    Description: NetworkAclId of the public network ACL
+    Value: !Ref PublicNetworkAcl
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicNetworkAcl
+  ElasticIp0:
+    Description: ElasticIpId of the elastic IP addres 0
+    Value: !Ref ElasticIp0
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-ElasticIp0
+  NatGateway0:
+    Description: NatGatewayId of the NAT gateway 0
+    Value: !Ref NatGateway0
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-NatGateway0

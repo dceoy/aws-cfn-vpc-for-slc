@@ -88,3 +88,8 @@ Outputs:
     Value: !GetAtt Ec2InstanceRole.Arn
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2InstanceRoleArn
+  Ec2InstanceProfileArn:
+    Description: EC2 instance profile Arn
+    Value: !GetAtt Ec2InstanceProfile.Arn
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2InstanceProfileArn

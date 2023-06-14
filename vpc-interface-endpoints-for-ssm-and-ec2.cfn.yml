@@ -27,7 +27,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
   Ec2MessagesInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -48,7 +48,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2messages
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
   SsmInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -69,7 +69,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ssm
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
   SsmMessagesInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -90,7 +90,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ssmmessages
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
   SecretsManagerInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -111,7 +111,7 @@ Resources:
       ServiceName: !Sub com.amazonaws.${AWS::Region}.secretsmanager
       VpcEndpointType: Interface
       VpcId:
-        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-VPC
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
 Outputs:
   Ec2InterfaceEndpointId:
     Description: EC2 interface endpoint Id
