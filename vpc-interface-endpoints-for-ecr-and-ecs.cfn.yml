@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: VPC interface endpoints
+Description: VPC interface endpoints for ECR and ECS
 Parameters:
   VpcStackName:
     Description: Set the VPC stack name.
