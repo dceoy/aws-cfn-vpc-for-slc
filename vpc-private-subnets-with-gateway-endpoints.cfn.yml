@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: VPC with private subnets in 3 AZs and VPC endpoints
+Description: VPC with private subnets in 3 AZs and gateway endpoints
 Parameters:
   ProjectName:
     Description: Set the project name.

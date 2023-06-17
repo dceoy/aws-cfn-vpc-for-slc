@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: an EC2 instance and an IAM role
+Description: EC2 instance with IAM role
 Parameters:
   KeyName:
     Description: Set a name of an existing EC2 KeyPair to enable SSH access to the instance.
