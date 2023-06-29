@@ -46,6 +46,8 @@ Resources:
           Value: Public
         - Key: Name
           Value: !Sub ${ProjectName}-vpc
+        - Key: ProjectName
+          Value: !Ref ProjectName
   PrivateSubnet0:
     Type: AWS::EC2::Subnet
     Properties:
@@ -64,6 +66,8 @@ Resources:
           Value: Private
         - Key: Name
           Value: !Sub ${ProjectName}-subnet-private0-${AWS::Region}${Az0}
+        - Key: ProjectName
+          Value: !Ref ProjectName
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -82,6 +86,8 @@ Resources:
           Value: Private
         - Key: Name
           Value: !Sub ${ProjectName}-subnet-private1-${AWS::Region}${Az1}
+        - Key: ProjectName
+          Value: !Ref ProjectName
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -100,6 +106,8 @@ Resources:
           Value: Private
         - Key: Name
           Value: !Sub ${ProjectName}-subnet-private2-${AWS::Region}${Az2}
+        - Key: ProjectName
+          Value: !Ref ProjectName
   PrivateRouteTable0:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -107,6 +115,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-rtb-private0-${AWS::Region}${Az0}
+        - Key: ProjectName
+          Value: !Ref ProjectName
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -114,6 +124,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-rtb-private1-${AWS::Region}${Az1}
+        - Key: ProjectName
+          Value: !Ref ProjectName
   PrivateRouteTable2:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -121,6 +133,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-rtb-private2-${AWS::Region}${Az2}
+        - Key: ProjectName
+          Value: !Ref ProjectName
   PrivateSubnetRouteTableAssociation0:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -201,6 +215,21 @@ Outputs:
     Value: !Ref PrivateSubnet2
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet2
+  AvailabilityZone0:
+    Description: Availability zone 0
+    Value: !GetAtt PrivateSubnet0.AvailabilityZone
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-AvailabilityZone0
+  AvailabilityZone1:
+    Description: Availability zone 1
+    Value: !GetAtt PrivateSubnet1.AvailabilityZone
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-AvailabilityZone1
+  AvailabilityZone2:
+    Description: Availability zone 2
+    Value: !GetAtt PrivateSubnet2.AvailabilityZone
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-AvailabilityZone2
   PrivateRouteTableId0:
     Description: RouteTableId of the private route table 0
     Value: !Ref PrivateRouteTable0
