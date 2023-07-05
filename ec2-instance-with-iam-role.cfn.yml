@@ -81,6 +81,7 @@ Resources:
   Ec2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
+      InstanceProfileName: !Sub ${InstanceName}-Ec2InstanceProfile
       Path: /
       Roles:
         - !Ref Ec2InstanceRole
