@@ -54,8 +54,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref InstanceName
-        - Key: ProjectName
-          Value: !Ref ProjectName
   Ec2InstanceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -76,8 +74,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${InstanceName}-Ec2InstanceRole
-        - Key: ProjectName
-          Value: !Ref ProjectName
   Ec2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
