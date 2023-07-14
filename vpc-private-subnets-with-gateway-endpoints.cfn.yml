@@ -6,18 +6,6 @@ Parameters:
     Description: Set the project name.
     Type: String
     Default: slc
-  Az0:
-    Description: Set the first AZ suffix.
-    Type: String
-    Default: a
-  Az1:
-    Description: Set the second AZ suffix.
-    Type: String
-    Default: c
-  Az2:
-    Description: Set the third AZ suffix.
-    Type: String
-    Default: d
 Mappings:
   SubnetConfig:
     Vpc:
@@ -52,7 +40,10 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Sub ${AWS::Region}${Az0}
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: !Ref AWS::Region
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
@@ -65,14 +56,24 @@ Resources:
         - Key: Network
           Value: Private
         - Key: Name
-          Value: !Sub ${ProjectName}-subnet-private0-${AWS::Region}${Az0}
+          Value:
+            Fn::Join:
+              - '-'
+              - - !Ref ProjectName
+                - -subnet-private0-
+                - Fn::Select:
+                    - 0
+                    - Fn::GetAZs: !Ref AWS::Region
         - Key: ProjectName
           Value: !Ref ProjectName
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Sub ${AWS::Region}${Az1}
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: !Ref AWS::Region
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
@@ -85,14 +86,24 @@ Resources:
         - Key: Network
           Value: Private
         - Key: Name
-          Value: !Sub ${ProjectName}-subnet-private1-${AWS::Region}${Az1}
+          Value:
+            Fn::Join:
+              - '-'
+              - - !Ref ProjectName
+                - -subnet-private1-
+                - Fn::Select:
+                    - 1
+                    - Fn::GetAZs: !Ref AWS::Region
         - Key: ProjectName
           Value: !Ref ProjectName
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Sub ${AWS::Region}${Az2}
+      AvailabilityZone:
+        Fn::Select:
+          - 2
+          - Fn::GetAZs: !Ref AWS::Region
       CidrBlock:
         Fn::FindInMap:
           - SubnetConfig
@@ -105,7 +116,14 @@ Resources:
         - Key: Network
           Value: Private
         - Key: Name
-          Value: !Sub ${ProjectName}-subnet-private2-${AWS::Region}${Az2}
+          Value:
+            Fn::Join:
+              - '-'
+              - - !Ref ProjectName
+                - -subnet-private2-
+                - Fn::Select:
+                    - 2
+                    - Fn::GetAZs: !Ref AWS::Region
         - Key: ProjectName
           Value: !Ref ProjectName
   PrivateRouteTable0:
@@ -114,7 +132,14 @@ Resources:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: !Sub ${ProjectName}-rtb-private0-${AWS::Region}${Az0}
+          Value:
+            Fn::Join:
+              - '-'
+              - - !Ref ProjectName
+                - -rtb-private0-
+                - Fn::Select:
+                    - 0
+                    - Fn::GetAZs: !Ref AWS::Region
         - Key: ProjectName
           Value: !Ref ProjectName
   PrivateRouteTable1:
@@ -123,7 +148,14 @@ Resources:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: !Sub ${ProjectName}-rtb-private1-${AWS::Region}${Az1}
+          Value:
+            Fn::Join:
+              - '-'
+              - - !Ref ProjectName
+                - -rtb-private1-
+                - Fn::Select:
+                    - 1
+                    - Fn::GetAZs: !Ref AWS::Region
         - Key: ProjectName
           Value: !Ref ProjectName
   PrivateRouteTable2:
@@ -132,7 +164,14 @@ Resources:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: !Sub ${ProjectName}-rtb-private2-${AWS::Region}${Az2}
+          Value:
+            Fn::Join:
+              - '-'
+              - - !Ref ProjectName
+                - -rtb-private2-
+                - Fn::Select:
+                    - 2
+                    - Fn::GetAZs: !Ref AWS::Region
         - Key: ProjectName
           Value: !Ref ProjectName
   PrivateSubnetRouteTableAssociation0:
