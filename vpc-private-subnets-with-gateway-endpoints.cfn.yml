@@ -58,7 +58,7 @@ Resources:
         - Key: Name
           Value:
             Fn::Join:
-              - '-'
+              - ''
               - - !Ref ProjectName
                 - -subnet-private0-
                 - Fn::Select:
@@ -88,7 +88,7 @@ Resources:
         - Key: Name
           Value:
             Fn::Join:
-              - '-'
+              - ''
               - - !Ref ProjectName
                 - -subnet-private1-
                 - Fn::Select:
@@ -118,7 +118,7 @@ Resources:
         - Key: Name
           Value:
             Fn::Join:
-              - '-'
+              - ''
               - - !Ref ProjectName
                 - -subnet-private2-
                 - Fn::Select:
@@ -134,7 +134,7 @@ Resources:
         - Key: Name
           Value:
             Fn::Join:
-              - '-'
+              - ''
               - - !Ref ProjectName
                 - -rtb-private0-
                 - Fn::Select:
@@ -150,7 +150,7 @@ Resources:
         - Key: Name
           Value:
             Fn::Join:
-              - '-'
+              - ''
               - - !Ref ProjectName
                 - -rtb-private1-
                 - Fn::Select:
@@ -166,7 +166,7 @@ Resources:
         - Key: Name
           Value:
             Fn::Join:
-              - '-'
+              - ''
               - - !Ref ProjectName
                 - -rtb-private2-
                 - Fn::Select:
