@@ -63,15 +63,21 @@ Installation
     ```sh
     # Create EC2 key pair
     $ aws ec2 create-key-pair \
-        --key-name MyKeyPair --query 'KeyMaterial' --output text \
-        > MyKeyPair.pem
-    $ chmod 400 MyKeyPair.pem
+        --key-name your-key-pair --query 'KeyMaterial' --output text \
+        > your-key-pair.pem
+    $ chmod 400 your-key-pair.pem
+
+    # Retrieve an ECS-optimized AMI ID
+    $ aws ssm get-parameters \
+        --names /aws/service/ecs/optimized-ami/amazon-linux-2023/recommended \
+        | jq -r .Parameters[0].Value \
+        | jq -r .image_id
 
     # Deploy the stacks
     $ rain deploy \
         vpc-interface-endpoints-for-ssm-and-ec2.cfn.yml \
         vpc-interface-endpoints-for-ssm-and-ec2
     $ rain deploy \
-        ec2-instance-with-iam-role.cfn.yml \
-        ec2-instance-with-iam-role
+          ec2-instance-with-iam-role.cfn.yml \
+          ec2-instance-with-iam-role
     ```

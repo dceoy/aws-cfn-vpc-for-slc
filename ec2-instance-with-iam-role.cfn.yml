@@ -6,58 +6,80 @@ Parameters:
     Description: Set a name of an existing EC2 KeyPair to enable SSH access to the instance.
     Type: AWS::EC2::KeyPair::KeyName
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  VpcStackName:
+    Description: Set the VPC stack name.
+    Type: String
+    Default: vpc-private-subnets-with-gateway-endpoints
+  ProjectName:
+    Description: Set the project name.
+    Type: String
+    Default: slc
   ImageId:
     Description: Set an EC2 AMI ID.
     Type: AWS::EC2::Image::Id
-    Default: ami-02a0270a232f442b0
+    Default: ami-0fd4bb49e3134c823
     ConstraintDescription: must be a valid EC2 instance type.
   InstanceType:
     Description: Set an EC2 instance type.
     Type: String
     Default: t2.micro
     ConstraintDescription: must be a valid EC2 instance type.
-  InstanceName:
-    Description: Set an EC2 instance name.
-    Type: String
-    Default: ec2-headnode
   EbsVolumeSize:
     Description: Set EBS volume size.
     Type: Number
     MinValue: 0
     Default: 30
-  VpcStackName:
-    Description: Set the VPC stack name.
-    Type: String
-    Default: vpc-private-subnets-with-gateway-endpoints
 Resources:
   Ec2Instance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: !Ref ImageId
-      KeyName: !Ref KeyName
-      InstanceType: !Ref InstanceType
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          SubnetId:
-            Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
-          GroupSet:
-            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
-      BlockDeviceMappings:
-        - DeviceName: /dev/xvda
-          Ebs:
-            VolumeSize: !Ref EbsVolumeSize
-            VolumeType: gp3
-            Encrypted: true
-            DeleteOnTermination: true
-      InstanceInitiatedShutdownBehavior: terminate
-      IamInstanceProfile: !Ref Ec2InstanceProfile
+      LaunchTemplate:
+        LaunchTemplateId: !Ref Ec2LaunchTemplate
+        Version: !GetAtt Ec2LaunchTemplate.LatestVersionNumber
       Tags:
         - Key: Name
-          Value: !Ref InstanceName
+          Value: !Sub ${ProjectName}-ec2-instance
+        - Key: ProjectName
+          Value: !Ref ProjectName
+  Ec2LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub ${ProjectName}-ec2-launch-template
+      LaunchTemplateData:
+        ImageId: !Ref ImageId
+        KeyName: !Ref KeyName
+        InstanceType: !Ref InstanceType
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: !Ref EbsVolumeSize
+              VolumeType: gp3
+              Encrypted: true
+              DeleteOnTermination: true
+        InstanceInitiatedShutdownBehavior: terminate
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            SubnetId:
+              Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+            Groups:
+              - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
+        IamInstanceProfile:
+          Arn: !GetAtt Ec2InstanceProfile.Arn
+        UserData:
+          Fn::Base64: |
+            #!/bin/bash
+            sudo yum -y upgrade
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: Name
+              Value: !Sub ${ProjectName}-ec2-launch-template
+            - Key: ProjectName
+              Value: !Ref ProjectName
   Ec2InstanceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${InstanceName}-Ec2InstanceRole
+      RoleName: !Sub ${ProjectName}-Ec2InstanceRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -73,11 +95,11 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       Tags:
         - Key: Name
-          Value: !Sub ${InstanceName}-Ec2InstanceRole
+          Value: !Sub ${ProjectName}-Ec2InstanceRole
   Ec2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: !Sub ${InstanceName}-Ec2InstanceProfile
+      InstanceProfileName: !Sub ${ProjectName}-Ec2InstanceProfile
       Path: /
       Roles:
         - !Ref Ec2InstanceRole
@@ -86,7 +108,11 @@ Outputs:
     Description: EC2 instance Id
     Value: !Ref Ec2Instance
     Export:
-      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2InstanceId
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2Instance
+  Ec2LaunchTemplate:
+    Value: !Ref Ec2LaunchTemplate
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2LaunchTemplate
   Ec2InstanceRoleArn:
     Description: EC2 instance role Arn
     Value: !GetAtt Ec2InstanceRole.Arn
