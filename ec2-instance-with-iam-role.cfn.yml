@@ -59,16 +59,13 @@ Resources:
         InstanceInitiatedShutdownBehavior: terminate
         NetworkInterfaces:
           - DeviceIndex: 0
-            SubnetId:
-              Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
-            Groups:
-              - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
+            NetworkInterfaceId: !Ref Ec2NetworkInterface
         IamInstanceProfile:
           Arn: !GetAtt Ec2InstanceProfile.Arn
         UserData:
           Fn::Base64: |
             #!/bin/bash
-            sudo yum -y upgrade
+            dnf -y upgrade && dnf clean all && rm -rf /var/cache/dnf
       TagSpecifications:
         - ResourceType: launch-template
           Tags:
@@ -76,6 +73,19 @@ Resources:
               Value: !Sub ${ProjectName}-ec2-launch-template
             - Key: ProjectName
               Value: !Ref ProjectName
+  Ec2NetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      SourceDestCheck: false
+      GroupSet:
+        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
+      SubnetId:
+        Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-ec2-network-interface
+        - Key: ProjectName
+          Value: !Ref ProjectName
   Ec2InstanceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -105,7 +115,6 @@ Resources:
         - !Ref Ec2InstanceRole
 Outputs:
   Ec2InstanceId:
-    Description: EC2 instance Id
     Value: !Ref Ec2Instance
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2Instance
@@ -113,13 +122,19 @@ Outputs:
     Value: !Ref Ec2LaunchTemplate
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2LaunchTemplate
+  Ec2NetworkInterfaceId:
+    Value: !Ref Ec2NetworkInterface
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2NetworkInterface
+  Ec2NetworkInterfacePrimaryPrivateIpAddress:
+    Value: !GetAtt Ec2NetworkInterface.PrimaryPrivateIpAddress
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2NetworkInterfacePrimaryPrivateIpAddress
   Ec2InstanceRoleArn:
-    Description: EC2 instance role Arn
     Value: !GetAtt Ec2InstanceRole.Arn
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2InstanceRoleArn
   Ec2InstanceProfileArn:
-    Description: EC2 instance profile Arn
     Value: !GetAtt Ec2InstanceProfile.Arn
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-Ec2InstanceProfileArn
