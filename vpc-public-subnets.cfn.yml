@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: VPC public subnets in 3 AZs
+Description: VPC public subnets
 Parameters:
   VpcStackName:
     Description: Set the VPC stack name.
@@ -10,6 +10,32 @@ Parameters:
     Description: Set the project name.
     Type: String
     Default: slc
+  NumberOfAvailabilityZones:
+    Description: Set the number of availability zones.
+    Type: Number
+    Default: 3
+    AllowedValues:
+      - 0
+      - 1
+      - 2
+      - 3
+Conditions:
+  UseAvailabilityZone0:
+    Fn::Or:
+      - Fn::Equals:
+          - !Ref NumberOfAvailabilityZones
+          - 1
+      - !Condition UseAvailabilityZone1
+  UseAvailabilityZone1:
+    Fn::Or:
+      - Fn::Equals:
+          - !Ref NumberOfAvailabilityZones
+          - 2
+      - !Condition UseAvailabilityZone2
+  UseAvailabilityZone2:
+    Fn::Equals:
+      - !Ref NumberOfAvailabilityZones
+      - 3
 Mappings:
   SubnetConfig:
     Public0:
@@ -21,6 +47,7 @@ Mappings:
 Resources:
   PublicSubnet0:
     Type: AWS::EC2::Subnet
+    Condition: UseAvailabilityZone0
     Properties:
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
@@ -47,6 +74,7 @@ Resources:
           Value: !Ref ProjectName
   PublicSubnet1:
     Type: AWS::EC2::Subnet
+    Condition: UseAvailabilityZone1
     Properties:
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
@@ -73,6 +101,7 @@ Resources:
           Value: !Ref ProjectName
   PublicSubnet2:
     Type: AWS::EC2::Subnet
+    Condition: UseAvailabilityZone2
     Properties:
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
@@ -138,16 +167,19 @@ Resources:
       GatewayId: !Ref InternetGateway
   PublicSubnetRouteTableAssociation0:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAvailabilityZone0
     Properties:
       SubnetId: !Ref PublicSubnet0
       RouteTableId: !Ref PublicRouteTable
   PublicSubnetRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAvailabilityZone1
     Properties:
       SubnetId: !Ref PublicSubnet1
       RouteTableId: !Ref PublicRouteTable
   PublicSubnetRouteTableAssociation2:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAvailabilityZone2
     Properties:
       SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
@@ -191,33 +223,48 @@ Resources:
         To: 65535
   PublicSubnetNetworkAclAssociation0:
     Type: AWS::EC2::SubnetNetworkAclAssociation
+    Condition: UseAvailabilityZone0
     Properties:
       SubnetId: !Ref PublicSubnet0
       NetworkAclId: !Ref PublicNetworkAcl
   PublicSubnetNetworkAclAssociation1:
     Type: AWS::EC2::SubnetNetworkAclAssociation
+    Condition: UseAvailabilityZone1
     Properties:
       SubnetId: !Ref PublicSubnet1
       NetworkAclId: !Ref PublicNetworkAcl
   PublicSubnetNetworkAclAssociation2:
     Type: AWS::EC2::SubnetNetworkAclAssociation
+    Condition: UseAvailabilityZone2
     Properties:
       SubnetId: !Ref PublicSubnet2
       NetworkAclId: !Ref PublicNetworkAcl
 Outputs:
   PublicSubnetId0:
     Description: SubnetId of public subnet 0
-    Value: !Ref PublicSubnet0
+    Value:
+      Fn::If:
+        - UseAvailabilityZone0
+        - !Ref PublicSubnet0
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet0
   PublicSubnetId1:
     Description: SubnetId of public subnet 1
-    Value: !Ref PublicSubnet1
+    Value:
+      Fn::If:
+        - UseAvailabilityZone1
+        - !Ref PublicSubnet1
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet1
   PublicSubnetId2:
     Description: SubnetId of public subnet 2
-    Value: !Ref PublicSubnet2
+    Value:
+      Fn::If:
+        - UseAvailabilityZone2
+        - !Ref PublicSubnet2
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet2
   InternetGatewayId:

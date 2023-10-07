@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: VPC public subnets in 3 AZs and a NAT gateway in 1 AZ
+Description: VPC public subnets and NAT gateways
 Parameters:
   VpcStackName:
     Description: Set the VPC stack name.
@@ -10,6 +10,44 @@ Parameters:
     Description: Set the project name.
     Type: String
     Default: slc
+  NumberOfNatGateways:
+    Description: Set the number of availability zones.
+    Type: String
+    Default: 1 per AZ
+    AllowedValues:
+      - 1 per AZ
+      - In 1 AZ
+  NumberOfAvailabilityZones:
+    Description: Set the number of availability zones.
+    Type: Number
+    Default: 3
+    AllowedValues:
+      - 1
+      - 2
+      - 3
+Conditions:
+  UseAvailabilityZone1:
+    Fn::Or:
+      - Fn::Equals:
+          - !Ref NumberOfAvailabilityZones
+          - 2
+      - !Condition UseAvailabilityZone2
+  UseAvailabilityZone2:
+    Fn::Equals:
+      - !Ref NumberOfAvailabilityZones
+      - 3
+  CreateNatGatewayPerAz:
+    Fn::Equals:
+      - !Ref NumberOfNatGateways
+      - 1 per AZ
+  CreateNatGateway1:
+    Fn::And:
+      - !Condition UseAvailabilityZone1
+      - !Condition CreateNatGatewayPerAz
+  CreateNatGateway2:
+    Fn::And:
+      - !Condition UseAvailabilityZone2
+      - !Condition CreateNatGatewayPerAz
 Mappings:
   SubnetConfig:
     Public0:
@@ -47,6 +85,7 @@ Resources:
           Value: !Ref ProjectName
   PublicSubnet1:
     Type: AWS::EC2::Subnet
+    Condition: UseAvailabilityZone1
     Properties:
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
@@ -73,6 +112,7 @@ Resources:
           Value: !Ref ProjectName
   PublicSubnet2:
     Type: AWS::EC2::Subnet
+    Condition: UseAvailabilityZone2
     Properties:
       VpcId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-Vpc
@@ -143,11 +183,13 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
   PublicSubnetRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAvailabilityZone1
     Properties:
       SubnetId: !Ref PublicSubnet1
       RouteTableId: !Ref PublicRouteTable
   PublicSubnetRouteTableAssociation2:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAvailabilityZone2
     Properties:
       SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
@@ -196,11 +238,13 @@ Resources:
       NetworkAclId: !Ref PublicNetworkAcl
   PublicSubnetNetworkAclAssociation1:
     Type: AWS::EC2::SubnetNetworkAclAssociation
+    Condition: UseAvailabilityZone1
     Properties:
       SubnetId: !Ref PublicSubnet1
       NetworkAclId: !Ref PublicNetworkAcl
   PublicSubnetNetworkAclAssociation2:
     Type: AWS::EC2::SubnetNetworkAclAssociation
+    Condition: UseAvailabilityZone2
     Properties:
       SubnetId: !Ref PublicSubnet2
       NetworkAclId: !Ref PublicNetworkAcl
@@ -215,6 +259,34 @@ Resources:
               - ''
               - - !Sub ${ProjectName}-eip0-
                 - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-AvailabilityZone0
+        - Key: ProjectName
+          Value: !Ref ProjectName
+  ElasticIp1:
+    Type: AWS::EC2::EIP
+    Condition: CreateNatGateway1
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - ''
+              - - !Sub ${ProjectName}-eip1-
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-AvailabilityZone1
+        - Key: ProjectName
+          Value: !Ref ProjectName
+  ElasticIp2:
+    Type: AWS::EC2::EIP
+    Condition: CreateNatGateway2
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - ''
+              - - !Sub ${ProjectName}-eip2-
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-AvailabilityZone2
         - Key: ProjectName
           Value: !Ref ProjectName
   NatGateway0:
@@ -234,6 +306,42 @@ Resources:
                 - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-AvailabilityZone0
         - Key: ProjectName
           Value: !Ref ProjectName
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Condition: CreateNatGateway1
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - ElasticIp1
+          - AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - ''
+              - - !Sub ${ProjectName}-nat-public1-
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-AvailabilityZone1
+        - Key: ProjectName
+          Value: !Ref ProjectName
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Condition: CreateNatGateway2
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - ElasticIp2
+          - AllocationId
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              - ''
+              - - !Sub ${ProjectName}-nat-public2-
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-AvailabilityZone2
+        - Key: ProjectName
+          Value: !Ref ProjectName
   PrivateRouteToInternet0:
     Type: AWS::EC2::Route
     Properties:
@@ -243,18 +351,28 @@ Resources:
       NatGatewayId: !Ref NatGateway0
   PrivateRouteToInternet1:
     Type: AWS::EC2::Route
+    Condition: UseAvailabilityZone1
     Properties:
       RouteTableId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateRouteTable1
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway0
+      NatGatewayId:
+        Fn::If:
+          - CreateNatGateway1
+          - !Ref NatGateway1
+          - !Ref NatGateway0
   PrivateRouteToInternet2:
     Type: AWS::EC2::Route
+    Condition: UseAvailabilityZone2
     Properties:
       RouteTableId:
         Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateRouteTable2
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway0
+      NatGatewayId:
+        Fn::If:
+          - CreateNatGateway2
+          - !Ref NatGateway2
+          - !Ref NatGateway0
 Outputs:
   PublicSubnetId0:
     Description: SubnetId of public subnet 0
@@ -263,12 +381,20 @@ Outputs:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet0
   PublicSubnetId1:
     Description: SubnetId of public subnet 1
-    Value: !Ref PublicSubnet1
+    Value:
+      Fn::If:
+        - UseAvailabilityZone1
+        - !Ref PublicSubnet1
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet1
   PublicSubnetId2:
     Description: SubnetId of public subnet 2
-    Value: !Ref PublicSubnet2
+    Value:
+      Fn::If:
+        - UseAvailabilityZone2
+        - !Ref PublicSubnet2
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PublicSubnet2
   InternetGatewayId:
@@ -291,8 +417,44 @@ Outputs:
     Value: !Ref ElasticIp0
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-ElasticIp0
+  ElasticIp1:
+    Description: ElasticIpId of the elastic IP addres 1
+    Value:
+      Fn::If:
+        - CreateNatGateway1
+        - !Ref ElasticIp1
+        - 'null'
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-ElasticIp1
+  ElasticIp2:
+    Description: ElasticIpId of the elastic IP addres 2
+    Value:
+      Fn::If:
+        - CreateNatGateway2
+        - !Ref ElasticIp2
+        - 'null'
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-ElasticIp2
   NatGateway0:
     Description: NatGatewayId of the NAT gateway 0
     Value: !Ref NatGateway0
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-NatGateway0
+  NatGateway1:
+    Description: NatGatewayId of the NAT gateway 1
+    Value:
+      Fn::If:
+        - CreateNatGateway1
+        - !Ref NatGateway1
+        - 'null'
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-NatGateway1
+  NatGateway2:
+    Description: NatGatewayId of the NAT gateway 2
+    Value:
+      Fn::If:
+        - CreateNatGateway2
+        - !Ref NatGateway2
+        - 'null'
+    Export:
+      Name: !Sub ${AWS::Region}-${AWS::StackName}-NatGateway2

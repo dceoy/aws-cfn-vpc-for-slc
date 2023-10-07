@@ -6,6 +6,25 @@ Parameters:
     Description: Set the VPC stack name.
     Type: String
     Default: vpc-private-subnets-with-gateway-endpoints
+  NumberOfAvailabilityZones:
+    Description: Set the number of availability zones.
+    Type: Number
+    Default: 3
+    AllowedValues:
+      - 1
+      - 2
+      - 3
+Conditions:
+  UseAvailabilityZone1:
+    Fn::Or:
+      - Fn::Equals:
+          - !Ref NumberOfAvailabilityZones
+          - 2
+      - !Condition UseAvailabilityZone2
+  UseAvailabilityZone2:
+    Fn::Equals:
+      - !Ref NumberOfAvailabilityZones
+      - 3
 Resources:
   EcrDkrInterfaceEndpoint:
     Type: AWS::EC2::VPCEndpoint
@@ -19,9 +38,16 @@ Resources:
             Action: '*'
       PrivateDnsEnabled: true
       SubnetIds:
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+        Fn::If:
+          - UseAvailabilityZone2
+          - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+          - Fn::If:
+              - UseAvailabilityZone1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
       SecurityGroupIds:
         - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
@@ -40,9 +66,16 @@ Resources:
             Action: '*'
       PrivateDnsEnabled: true
       SubnetIds:
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+        Fn::If:
+          - UseAvailabilityZone2
+          - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+          - Fn::If:
+              - UseAvailabilityZone1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
       SecurityGroupIds:
         - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
@@ -61,9 +94,16 @@ Resources:
             Action: '*'
       PrivateDnsEnabled: true
       SubnetIds:
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+        Fn::If:
+          - UseAvailabilityZone2
+          - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+          - Fn::If:
+              - UseAvailabilityZone1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
       SecurityGroupIds:
         - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs
@@ -82,9 +122,16 @@ Resources:
             Action: '*'
       PrivateDnsEnabled: true
       SubnetIds:
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+        Fn::If:
+          - UseAvailabilityZone2
+          - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+          - Fn::If:
+              - UseAvailabilityZone1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
       SecurityGroupIds:
         - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-agent
@@ -103,9 +150,16 @@ Resources:
             Action: '*'
       PrivateDnsEnabled: true
       SubnetIds:
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+        Fn::If:
+          - UseAvailabilityZone2
+          - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+          - Fn::If:
+              - UseAvailabilityZone1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
       SecurityGroupIds:
         - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
       ServiceName: !Sub com.amazonaws.${AWS::Region}.ecs-telemetry
@@ -124,9 +178,16 @@ Resources:
             Action: '*'
       PrivateDnsEnabled: true
       SubnetIds:
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
-        - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+        Fn::If:
+          - UseAvailabilityZone2
+          - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+            - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet2
+          - Fn::If:
+              - UseAvailabilityZone1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
+                - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet1
+              - - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-PrivateSubnet0
       SecurityGroupIds:
         - Fn::ImportValue: !Sub ${AWS::Region}-${VpcStackName}-DefaultSecurityGroup
       ServiceName: !Sub com.amazonaws.${AWS::Region}.logs

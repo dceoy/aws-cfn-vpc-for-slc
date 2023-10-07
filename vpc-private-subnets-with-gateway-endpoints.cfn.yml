@@ -1,11 +1,37 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: VPC with private subnets in 3 AZs and gateway endpoints
+Description: VPC with private subnets and gateway endpoints
 Parameters:
   ProjectName:
     Description: Set the project name.
     Type: String
     Default: slc
+  NumberOfAvailabilityZones:
+    Description: Set the number of availability zones.
+    Type: Number
+    Default: 3
+    AllowedValues:
+      - 0
+      - 1
+      - 2
+      - 3
+Conditions:
+  UseAvailabilityZone0:
+    Fn::Or:
+      - Fn::Equals:
+          - !Ref NumberOfAvailabilityZones
+          - 1
+      - !Condition UseAvailabilityZone1
+  UseAvailabilityZone1:
+    Fn::Or:
+      - Fn::Equals:
+          - !Ref NumberOfAvailabilityZones
+          - 2
+      - !Condition UseAvailabilityZone2
+  UseAvailabilityZone2:
+    Fn::Equals:
+      - !Ref NumberOfAvailabilityZones
+      - 3
 Mappings:
   SubnetConfig:
     Vpc:
@@ -38,6 +64,7 @@ Resources:
           Value: !Ref ProjectName
   PrivateSubnet0:
     Type: AWS::EC2::Subnet
+    Condition: UseAvailabilityZone0
     Properties:
       VpcId: !Ref Vpc
       AvailabilityZone:
@@ -68,6 +95,7 @@ Resources:
           Value: !Ref ProjectName
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
+    Condition: UseAvailabilityZone1
     Properties:
       VpcId: !Ref Vpc
       AvailabilityZone:
@@ -98,6 +126,7 @@ Resources:
           Value: !Ref ProjectName
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
+    Condition: UseAvailabilityZone2
     Properties:
       VpcId: !Ref Vpc
       AvailabilityZone:
@@ -128,6 +157,7 @@ Resources:
           Value: !Ref ProjectName
   PrivateRouteTable0:
     Type: AWS::EC2::RouteTable
+    Condition: UseAvailabilityZone0
     Properties:
       VpcId: !Ref Vpc
       Tags:
@@ -144,6 +174,7 @@ Resources:
           Value: !Ref ProjectName
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
+    Condition: UseAvailabilityZone1
     Properties:
       VpcId: !Ref Vpc
       Tags:
@@ -160,6 +191,7 @@ Resources:
           Value: !Ref ProjectName
   PrivateRouteTable2:
     Type: AWS::EC2::RouteTable
+    Condition: UseAvailabilityZone2
     Properties:
       VpcId: !Ref Vpc
       Tags:
@@ -176,21 +208,25 @@ Resources:
           Value: !Ref ProjectName
   PrivateSubnetRouteTableAssociation0:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAvailabilityZone0
     Properties:
       SubnetId: !Ref PrivateSubnet0
       RouteTableId: !Ref PrivateRouteTable0
   PrivateSubnetRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAvailabilityZone1
     Properties:
       SubnetId: !Ref PrivateSubnet1
       RouteTableId: !Ref PrivateRouteTable1
   PrivateSubnetRouteTableAssociation2:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: UseAvailabilityZone2
     Properties:
       SubnetId: !Ref PrivateSubnet2
       RouteTableId: !Ref PrivateRouteTable2
   S3GatewayEndpoint:
     Type: AWS::EC2::VPCEndpoint
+    Condition: UseAvailabilityZone0
     Properties:
       PolicyDocument:
         Version: 2012-10-17
@@ -200,14 +236,22 @@ Resources:
             Principal: '*'
             Action: '*'
       RouteTableIds:
-        - !Ref PrivateRouteTable0
-        - !Ref PrivateRouteTable1
-        - !Ref PrivateRouteTable2
+        Fn::If:
+          - UseAvailabilityZone2
+          - - !Ref PrivateRouteTable0
+            - !Ref PrivateRouteTable1
+            - !Ref PrivateRouteTable2
+          - Fn::If:
+              - UseAvailabilityZone1
+              - - !Ref PrivateRouteTable0
+                - !Ref PrivateRouteTable1
+              - - !Ref PrivateRouteTable0
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcEndpointType: Gateway
       VpcId: !Ref Vpc
   DynamodbGatewayEndpoint:
     Type: AWS::EC2::VPCEndpoint
+    Condition: UseAvailabilityZone0
     Properties:
       PolicyDocument:
         Version: 2012-10-17
@@ -217,9 +261,16 @@ Resources:
             Principal: '*'
             Action: '*'
       RouteTableIds:
-        - !Ref PrivateRouteTable0
-        - !Ref PrivateRouteTable1
-        - !Ref PrivateRouteTable2
+        Fn::If:
+          - UseAvailabilityZone2
+          - - !Ref PrivateRouteTable0
+            - !Ref PrivateRouteTable1
+            - !Ref PrivateRouteTable2
+          - Fn::If:
+              - UseAvailabilityZone1
+              - - !Ref PrivateRouteTable0
+                - !Ref PrivateRouteTable1
+              - - !Ref PrivateRouteTable0
       ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
       VpcEndpointType: Gateway
       VpcId: !Ref Vpc
@@ -241,56 +292,100 @@ Outputs:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-DefaultNetworkAcl
   PrivateSubnetId0:
     Description: SubnetId of the private subnet 0
-    Value: !Ref PrivateSubnet0
+    Value:
+      Fn::If:
+        - UseAvailabilityZone0
+        - !Ref PrivateSubnet0
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet0
   PrivateSubnetId1:
     Description: SubnetId of the private subnet 1
-    Value: !Ref PrivateSubnet1
+    Value:
+      Fn::If:
+        - UseAvailabilityZone1
+        - !Ref PrivateSubnet1
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet1
   PrivateSubnetId2:
     Description: SubnetId of the private subnet 2
-    Value: !Ref PrivateSubnet2
+    Value:
+      Fn::If:
+        - UseAvailabilityZone2
+        - !Ref PrivateSubnet2
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateSubnet2
   AvailabilityZone0:
     Description: Availability zone 0
-    Value: !GetAtt PrivateSubnet0.AvailabilityZone
+    Value:
+      Fn::If:
+        - UseAvailabilityZone0
+        - !GetAtt PrivateSubnet0.AvailabilityZone
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-AvailabilityZone0
   AvailabilityZone1:
     Description: Availability zone 1
-    Value: !GetAtt PrivateSubnet1.AvailabilityZone
+    Value:
+      Fn::If:
+        - UseAvailabilityZone1
+        - !GetAtt PrivateSubnet1.AvailabilityZone
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-AvailabilityZone1
   AvailabilityZone2:
     Description: Availability zone 2
-    Value: !GetAtt PrivateSubnet2.AvailabilityZone
+    Value:
+      Fn::If:
+        - UseAvailabilityZone2
+        - !GetAtt PrivateSubnet2.AvailabilityZone
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-AvailabilityZone2
   PrivateRouteTableId0:
     Description: RouteTableId of the private route table 0
-    Value: !Ref PrivateRouteTable0
+    Value:
+      Fn::If:
+        - UseAvailabilityZone0
+        - !Ref PrivateRouteTable0
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateRouteTable0
   PrivateRouteTableId1:
     Description: RouteTableId of the private route table 1
-    Value: !Ref PrivateRouteTable1
+    Value:
+      Fn::If:
+        - UseAvailabilityZone1
+        - !Ref PrivateRouteTable1
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateRouteTable1
   PrivateRouteTableId2:
     Description: RouteTableId of the private route table 2
-    Value: !Ref PrivateRouteTable2
+    Value:
+      Fn::If:
+        - UseAvailabilityZone2
+        - !Ref PrivateRouteTable2
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-PrivateRouteTable2
   S3GatewayEndpointId:
     Description: S3 gateway endpoint Id
-    Value: !Ref S3GatewayEndpoint
+    Value:
+      Fn::If:
+        - UseAvailabilityZone0
+        - !Ref S3GatewayEndpoint
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-S3GatewayEndpoint
   DynamodbGatewayEndpointId:
     Description: DynamoDB gateway endpoint Id
-    Value: !Ref DynamodbGatewayEndpoint
+    Value:
+      Fn::If:
+        - UseAvailabilityZone0
+        - !Ref DynamodbGatewayEndpoint
+        - 'null'
     Export:
       Name: !Sub ${AWS::Region}-${AWS::StackName}-DynamodbGatewayEndpoint

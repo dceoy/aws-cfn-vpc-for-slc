@@ -39,16 +39,8 @@ Installation
 
       ```sh
       $ rain deploy \
-          vpc-public-subnets-with-nat-gateway-per-az.cfn.yml \
-          vpc-public-subnets-with-nat-gateway-per-az
-      ```
-
-    - public subnets with a NAT gateway in 1 AZ
-
-      ```sh
-      $ rain deploy \
-          vpc-public-subnets-with-nat-gateway-in-1az.cfn.yml \
-          vpc-public-subnets-with-nat-gateway-in-1az
+          vpc-public-subnets-with-nat-gateways.cfn.yml \
+          vpc-public-subnets-with-nat-gateways
       ```
 
     - public subnets without NAT gateway
