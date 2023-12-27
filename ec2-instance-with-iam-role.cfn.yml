@@ -16,8 +16,8 @@ Parameters:
     Default: slc
   ImageId:
     Description: Set an EC2 AMI ID.
-    Type: AWS::EC2::Image::Id
-    Default: ami-0fd4bb49e3134c823
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
     ConstraintDescription: must be a valid EC2 instance type.
   InstanceType:
     Description: Set an EC2 instance type.
