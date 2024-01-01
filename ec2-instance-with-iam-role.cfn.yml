@@ -22,7 +22,7 @@ Parameters:
   InstanceType:
     Description: Set an EC2 instance type.
     Type: String
-    Default: t2.micro
+    Default: t4g.small
     ConstraintDescription: must be a valid EC2 instance type.
   EbsVolumeSize:
     Description: Set EBS volume size.
